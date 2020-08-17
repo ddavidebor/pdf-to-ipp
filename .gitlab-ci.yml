@@ -1,0 +1,17 @@
+build:
+  image: docker:latest
+  services:
+  - docker:dind
+  stage: build
+  script:
+    - apk add curl
+    - export DOCKER_BUILDKIT=1
+    - export DOCKER_CLI_EXPERIMENTAL=enabled
+    - mkdir -p ~/.docker/cli-plugins/
+    - curl -L $(curl -s -L https://github.com/docker/buildx/releases/latest | grep 'linux-amd64' | grep 'href' | sed 's/.*href="/https:\/\/github.com/g; s/amd64".*/amd64/g') -o ~/.docker/cli-plugins/docker-buildx
+    - chmod a+x ~/.docker/cli-plugins/docker-buildx
+    - docker run --rm --privileged docker/binfmt:66f9012c56a8316f9244ffd7622d7c21c1f6f28d
+    - docker buildx create --name multibuilder
+    - docker buildx use multibuilder
+    - docker login -u ${DOCKERHUB_USER} -p ${DOCKERHUB_PASS}
+    - docker buildx build --platform linux/amd64,linux/s390x,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64/v8 -t aapjeisbaas/pdf-to-ipp:latest . --push
