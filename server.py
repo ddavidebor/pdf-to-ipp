@@ -29,7 +29,7 @@ def size_check(file):
 
 def label_print(file):
     print("calling lpr command")
-    subprocess.call(["lp", "-o" "fit-to-page", file])
+    subprocess.call(["lp", file])
 
 @app.route('/')
 def root():
